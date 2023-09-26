@@ -1,24 +1,102 @@
 <%- include("header") -%>
+  <!-- Logout form -->
+  <form action="/logout" method="post" class="logout-form">
+    <button type="submit" class="logout-button">Logout</button>
+  </form>
 
-  <div class="box" id="heading">
-    <h1> <%= listTitle %> </h1>
-  </div>
-
-  <div class="box">
-    <% newListItems.forEach(function(item){ %>
-        <form action="/delete" method="post">
-          <div class="item">
-            <input type="checkbox" name="checkbox" value="<%= item._id %>" onChange="this.form.submit()">
-            <p><%=  item.name  %></p>
-          </div>
-          <input type="hidden" name="listName" value="<%= listTitle %>">
-        </form>
-    <% }) %>
-
-      <form class="item" action="/" method="post">
+  <div class="full-container">
+    <div class="left-container">
+      <form action="/create-list" class="create-list" method="POST">
+        <input type="text" name="newListTitle" placeholder="Create a new List" autocomplete="off">
+        <!-- Button to create a new list -->
+        <button type="submit" id="create-list-button">+</button>
+      </form>
+    
+      <div id="heading">
+        <h1 id="title"> <%= listTitle %> </h1>
+      </div>
+    
+      <div class="box">
+        <% newListItems.forEach(function(item){ %>
+            <form action="/delete" method="post">
+              <div class="item">
+                <input type="checkbox" name="checkbox" value="<%= item._id %>" onChange="this.form.submit()">
+                <p><%=  item.name  %></p>
+                <button class="clock-button" type="button" onclick="openModal('<%= item._id %>')">🕒</button>
+              </div>
+              <input type="hidden" name="listName" value="<%= listTitle %>">
+            </form>            
+        <% }) %>
+    
+      </div>
+      <form class="entryItem" action="/" method="post">
         <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
         <button type="submit" name="list" value="<%= listTitle %>">+</button>
       </form>
+    </div>
+  
+    <!-- Section to display user's lists -->
+    <div class="user-lists-box">
+      <h2>Your Lists</h2>
+      <ul class="user-lists">
+          <% userLists.forEach(function (list) { %>
+              <li class="userLists">
+                  <a href="/<%= list.name %>"><%= list.name%></a>
+                  <% if(list.name !== "Dashboard") { %>
+                    <form action="/delete-list" method="post" class="delete-form">
+                      <input type="hidden" name="listId" value="<%= list._id %>">
+                      <button type="submit" class="delete-button">-</button>
+                    </form>
+                  <% } %>
+              </li>
+          <% }); %>
+      </ul>
+    </div>
   </div>
+
+  <!-- Modal for setting date and time (move this to the end of your list.ejs file) -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Set Date and Time</h2>
+      <form action="/schedule-email" id="emailForm" method="POST">
+        <input type="datetime-local" id="emailDateTime" name="emailDateTime" required>
+        <button type="submit" class="modal-button">Schedule Email</button>
+      </form>
+    </div>
+  </div>
+
+
+<script>
+  let selectedItem = null; // To store the currently selected item
+
+   // Add this code to ensure the modal is initially hidden
+  const modal = document.getElementById("myModal");
+  modal.style.display = "none";
+  
+  // Function to open the modal and store the selected item
+  function openModal(itemId) {
+    selectedItem = itemId;
+    modal.style.display = "block";
+  }
+
+  // Function to close the modal
+  function closeModal() {
+    selectedItem = null;
+    modal.style.display = "none";
+  }
+
+  // JavaScript code to handle the query parameter and display an alert
+  document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+
+    if (message === 'EmailScheduled') {
+      // Display an alert or show a notification to the user
+      alert('Email has been scheduled successfully!');
+    }
+  });
+
+</script>
 
 <%- include("footer") -%>

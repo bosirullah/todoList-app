@@ -1,8 +1,36 @@
 html {
-  background-color: #E4E9FD;
-  background-image: -webkit-linear-gradient(65deg, #A683E3 50%, #E4E9FD 50%);
-  min-height: 1000px;
-  font-family: 'helvetica neue';
+  height: 100%;
+  font-family: 'Helvetica Neue', sans-serif;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* This keeps the background fixed while scrolling */
+}
+
+/* Add a gradient overlay for a smoother transition */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(255deg, #A683E3 50%, #E4E9FD 50%);
+  opacity: 0.7; /* Adjust the opacity to your liking */
+  pointer-events: none; /* This allows interaction with elements underneath */
+  z-index: -1;
+}
+
+.full-container{
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  column-gap: 200px;
+  padding: 8% 10% 0 10%;
+}
+
+.left-container{
+  height: 100%;
+  width: 450px;
 }
 
 h1 {
@@ -11,23 +39,84 @@ h1 {
 }
 
 .box {
-  max-width: 400px;
-  margin: 50px auto;
+  /* max-width: 400px; */
+  width: 100%;
+  margin: 50px auto 0;
   background: white;
-  border-radius: 5px;
+  border-radius: 5px 5px 0 0;
   box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  max-height: 250px;
 }
 
 #heading {
   background-color: #A683E3;
+  width: 100%;
+  margin: 50px auto;
+  border-radius: 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
   text-align: center;
+  height: 70px;
+}
+
+#title{
+  margin-top: 0;
+  padding-top: 3.5%;
+}
+
+.create-list{
+  margin: 0 auto;
+  display: flex;
+  column-gap: 40px;
+  justify-content: center;
+}
+
+#create-list-button{
+  width: 80px;
+}
+
+/* Add these CSS rules for positioning the logout button */
+.logout-form {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+}
+
+.logout-button {
+  height: 50px;
+  width: 100%;
+  background-color: #7d3b8e;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  justify-content: end;
+}
+
+.logout-button:hover {
+  background-color: #592b65;
 }
 
 .item {
-  min-height: 70px;
+  max-height: 60px;
   display: flex;
   align-items: center;
   border-bottom: 1px solid #F1F1F1;
+}
+.entryItem{
+  max-height: 60px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #F1F1F1;
+  
+  margin: 0 auto;
+  background: white;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+
 }
 
 .item:last-child {
@@ -57,14 +146,21 @@ form.item {
 }
 
 button {
-  min-height: 50px;
-  width: 50px;
+  height: 60px;
+  width: 70px;
   border-radius: 50%;
   border-color: transparent;
   background-color: #A683E3;
   color: #fff;
   font-size: 30px;
   border-width: 0;
+}
+
+button:hover{
+  cursor: pointer;
+}
+.clock-button{
+  background-color: white;
 }
 
 input[type="text"] {
@@ -75,7 +171,8 @@ input[type="text"] {
   background: transparent;
   font-size: 20px;
   font-weight: 200;
-  width: 313px;
+  width: 100%;
+  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
 }
 
 input[type="text"]:focus {
@@ -93,3 +190,157 @@ footer {
   color: rgba(0, 0, 0, 0.5);
   text-align: center;
 }
+
+/* Icon for the list link */
+.user-lists .list-icon {
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+/* Add this CSS to your stylesheet */
+.user-lists-box {
+  width: 280px;
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 5px 5px 15px 5px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+}
+
+.user-lists-box h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.user-lists {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-lists li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-lists a {
+  flex-grow: 1;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.3s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.user-lists a:hover {
+  color: #0056b3;
+  background-color: #f0f0f0;
+}
+
+.delete-form {
+  margin-left: 10px;
+}
+
+.delete-button {
+  width: 50px;
+  height: 40px;
+  background-color: #c26f69; /* Red color, you can change it to your desired color */
+  color: white;
+  border: none;
+  /* padding: 1px 10px; */
+  padding: 0;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Add hover effect for the delete button */
+.delete-button:hover {
+  background-color: #ba4d4d; /* Darker red color on hover */
+}
+
+/* CSS for the modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1;
+}
+
+.modal-content {
+  background-color: #fff;
+  width: 300px;
+  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.close {
+  position: absolute;
+  font-size: 30px;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+}
+
+.close:hover{
+  cursor: pointer;
+  color: lightgray
+}
+
+/* Style the date-time input */
+#emailDateTime {
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* Style the modal-button */
+.modal-button {
+  width: 80%;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Hover effect for the modal-button */
+.modal-button:hover {
+  background-color: #45a049;
+}
+
+@media (max-width: 950px){
+  .full-container{
+    margin-top: 5rem;
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+  } 
+}
+
+
+
