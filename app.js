@@ -30,6 +30,7 @@ app.use(
 // Initialize Passport and session
 app.use(passport.initialize());
 app.use(passport.session());
+const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 
@@ -220,6 +221,6 @@ app.post("/delete-list", function (req, res) {
   else res.redirect("/");
 });
 
-app.listen(3000, function() {
+app.listen(PORT, function() {
   console.log("Server started on port 3000");
 });
