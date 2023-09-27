@@ -172,7 +172,8 @@ input[type="text"] {
   font-size: 20px;
   font-weight: 200;
   width: 100%;
-  box-shadow: 5px 5px 15px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 5px 15px 0 rgba(0, 0, 0, 0.2);
+  outline: none;
 }
 
 input[type="text"]:focus {
@@ -340,7 +341,19 @@ footer {
     flex-direction: column;
     row-gap: 30px;
   } 
+  
+  .left-container{
+    width: 100%;
+    margin: auto;
+  }
+
+  .user-lists-box{
+    width: 80%;
+    margin: 2rem auto 5rem auto;
+  }
 }
+
+
 
 
 
