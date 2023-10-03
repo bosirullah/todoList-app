@@ -5,7 +5,8 @@ const smtpPass = process.env.SMTPPASS;
 const PORT = process.env.port || 25;
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    service: 'gmail',
+    host: 'smtp.gmail.com', 
     port: PORT,
     auth: {
         user: 'todoListOfficial5657@gmail.com',
