@@ -71,16 +71,21 @@ function sendEmail(userEmail, callback) {
     text: 'Your task is due for today' // Email content (text)
   };
 
-  // Send the email using Nodemailer
-  nodemailer.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending email:', error);
-      callback(error);
-    } else {
-      console.log('Email sent:', info.response);
-      callback(null); // No error, email sent successfully
-    }
-  });
+  try {
+    // Send the email using Nodemailer
+    nodemailer.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        callback(error);
+      } else {
+        console.log('Email sent:', info.response);
+        callback(null); // No error, email sent successfully
+      }
+    });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    callback(error);
+  }
 }
 
 app.post('/schedule-email', (req, res) => {
@@ -94,23 +99,28 @@ app.post('/schedule-email', (req, res) => {
   const cronDateTime = `${emailDateTime.getSeconds()} ${emailDateTime.getMinutes()} ${emailDateTime.getHours()} ${emailDateTime.getDate()} ${emailDateTime.getMonth() + 1} * ${emailDateTime.getFullYear()}`;
 
   // Schedule the email to be sent at the specified time
-  cron.schedule(cronDateTime, () => {
-    // Send the email using the sendEmail function
-    sendEmail(userEmail, (error) => {
-      if (error) {
-        // Handle the error as needed
-        console.error('Error scheduling and sending email:', error);
-      } else {
-        // No need to respond to the client here
-        console.log('Email scheduled and sent successfully.');
-      }
-      
+  try {
+    cron.schedule(cronDateTime, () => {
+      // Send the email using the sendEmail function
+      sendEmail(userEmail, (error) => {
+        if (error) {
+          // Handle the error as needed
+          console.error('Error scheduling and sending email:', error);
+        } else {
+          // No need to respond to the client here
+          console.log('Email scheduled and sent successfully.');
+        }
+      });
     });
-  });
+  } catch (error) {
+    console.error('Error scheduling email:', error);
+    // Handle the scheduling error as needed
+  }
 
   // Respond to the client with a redirect to the dashboard with a query parameter
   res.redirect("/Dashboard?message=EmailScheduled");
 });
+
 
 app.get("/:customListName",(req,res)=>{
   if(req.isAuthenticated()){
