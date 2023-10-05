@@ -8,8 +8,7 @@ const {Item} = require("./models/Item");
 const List = require("./models/List");
 const authRoutes = require("./routes/auth");
 const bodyParser = require("body-parser");
-const cron = require('node-cron');
-const nodemailer = require('./config/nodemailer'); // Require the Nodemailer configuration
+const sendEmail = require('./config/mailjet'); // Require the Nodemailer configuration
 
 const _ = require("lodash");
 require("dotenv").config();
@@ -62,65 +61,38 @@ const item3 = new Item ({
 
 const defaultItems = [item1,item2,item3];
 
-// Function to send an email
-function sendEmail(userEmail, callback) {
-  const mailOptions = {
-    from: 'todoListOfficial5657@gmail.com', // Sender's email address
-    to: userEmail, // Recipient's email address
-    subject: 'Reminder', // Email subject
-    text: 'Your task is due for today' // Email content (text)
-  };
-
-  try {
-    // Send the email using Nodemailer
-    nodemailer.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        callback(error);
-      } else {
-        console.log('Email sent:', info.response);
-        callback(null); // No error, email sent successfully
-      }
-    });
-  } catch (error) {
-    console.error('Error sending email:', error);
-    callback(error);
-  }
-}
-
 app.post('/schedule-email', (req, res) => {
-  // const emailDateTime = req.body.emailDateTime;
   const userEmail = req.user.username; // Retrieve the user's email from your authentication system
-
-  // const emailDateTime = new Date('2023-09-30T14:30:00');
   const emailDateTimeStr = req.body.emailDateTime;
   const emailDateTime = new Date(emailDateTimeStr);
 
-  const cronDateTime = `${emailDateTime.getSeconds()} ${emailDateTime.getMinutes()} ${emailDateTime.getHours()} ${emailDateTime.getDate()} ${emailDateTime.getMonth() + 1} * ${emailDateTime.getFullYear()}`;
-
   // Schedule the email to be sent at the specified time
-  try {
-    cron.schedule(cronDateTime, () => {
-      // Send the email using the sendEmail function
-      sendEmail(userEmail, (error) => {
-        if (error) {
-          // Handle the error as needed
-          console.error('Error scheduling and sending email:', error);
-        } else {
-          // No need to respond to the client here
-          console.log('Email scheduled and sent successfully.');
-        }
-      });
-    });
-  } catch (error) {
-    console.error('Error scheduling email:', error);
-    // Handle the scheduling error as needed
+  const currentDate = new Date();
+  const timeDifference = emailDateTime - currentDate;
+
+  if (timeDifference <= 0) {
+    // Handle error: Scheduled time is in the past
+    console.error('Scheduled time is in the past.');
+    res.status(400).send('Scheduled time is in the past.');
+    return;
   }
 
-  // Respond to the client with a redirect to the dashboard with a query parameter
+  // Schedule the email using a setTimeout
+  setTimeout(() => {
+    // Send the email using the sendEmail function
+    sendEmail(userEmail, (error) => {
+      if (error) {
+        // Handle the error as needed
+        console.error('Error scheduling and sending email:', error);
+      } else {
+        console.log('Email scheduled and sent successfully.');
+      }
+    });
+  }, timeDifference);
+
+  // Respond to the client with a success message
   res.redirect("/Dashboard?message=EmailScheduled");
 });
-
 
 app.get("/:customListName",(req,res)=>{
   if(req.isAuthenticated()){
