@@ -10,7 +10,7 @@ async function sendEmail(userEmail, callback) {
         Messages: [
         {
             From: {
-                Email: 'todoListOfficial5657@gmail.com',
+                Email: 'urekmazino10@outlook.com',
                 Name: 'todoList App',
             },
             To: [
