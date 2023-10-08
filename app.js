@@ -77,6 +77,10 @@ app.post('/schedule-email', async (req, res) => {
       return res.status(400).send('Scheduled time is in the past.');
     }
 
+    // Calculate the time difference between the scheduled time and the current time in milliseconds
+    const timeDifference = emailDateTime - currentDate;
+
+
     // Create the email payload for Mailjet
     const mailjetData = {
       Messages: [
@@ -96,26 +100,32 @@ app.post('/schedule-email', async (req, res) => {
       ],
       SendAt: emailDateTime.toISOString(), // Convert the date to ISO8601 format
     };
+    // Use setTimeout to schedule the email to be sent at the specified time
+    setTimeout(async () => {
+      try {
+        // Make a POST request to Mailjet's send endpoint to schedule the email
+        const response = await axios.post(
+          'https://api.mailjet.com/v3.1/send',
+          mailjetData,
+          {
+            auth: {
+              username: apiKey, // Replace with your Mailjet API key
+              password: apiSecretKey, // Replace with your Mailjet API secret
+            },
+          }
+        );
 
-    // Make a POST request to Mailjet's send endpoint to schedule the email
-    const response = await axios.post(
-      'https://api.mailjet.com/v3.1/send',
-      mailjetData,
-      {
-        auth: {
-          username: apiKey, // Replace with your Mailjet API key
-          password: apiSecretKey, // Replace with your Mailjet API secret
-        },
+        console.log('Email scheduled successfully:', response.data);
+      } catch (error) {
+        console.error('Error scheduling and sending email:', error);
       }
-    );
-
-    console.log('Email scheduled successfully:', response.data);
+    }, timeDifference);
 
     // Respond to the client with a success message
     return res.redirect('/Dashboard?message=EmailScheduled');
   } catch (error) {
-    console.error('Error scheduling and sending email:', error);
-    return res.status(500).send('Error scheduling and sending email.');
+    console.error('Error scheduling email:', error);
+    return res.status(500).send('Error scheduling email.');
   }
 });
 
