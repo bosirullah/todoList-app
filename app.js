@@ -8,12 +8,15 @@ const {Item} = require("./models/Item");
 const List = require("./models/List");
 const authRoutes = require("./routes/auth");
 const bodyParser = require("body-parser");
-const sendEmail = require('./config/mailjet'); // Require the Nodemailer configuration
+const axios = require('axios'); // Require Axios for making HTTP requests
+
 
 const _ = require("lodash");
 require("dotenv").config();
 
 const password = process.env.PASSWORD;
+const apiKey = process.env.APIKEY;
+const apiSecretKey = process.env.APISECRETKEY;
 
 const app = express();
 
@@ -61,38 +64,61 @@ const item3 = new Item ({
 
 const defaultItems = [item1,item2,item3];
 
-app.post('/schedule-email', (req, res) => {
-  const userEmail = req.user.username; // Retrieve the user's email from your authentication system
-  const emailDateTimeStr = req.body.emailDateTime;
-  const emailDateTime = new Date(emailDateTimeStr);
+app.post('/schedule-email', async (req, res) => {
+  try {
+    const userEmail = req.user.username; // Retrieve the user's email from your authentication system
+    const emailDateTimeStr = req.body.emailDateTime;
+    const emailDateTime = new Date(emailDateTimeStr);
 
-  // Schedule the email to be sent at the specified time
-  const currentDate = new Date();
-  const timeDifference = emailDateTime - currentDate;
+    // Ensure the scheduled time is in the future
+    const currentDate = new Date();
+    if (emailDateTime <= currentDate) {
+      console.error('Scheduled time is in the past.');
+      return res.status(400).send('Scheduled time is in the past.');
+    }
 
-  if (timeDifference <= 0) {
-    // Handle error: Scheduled time is in the past
-    console.error('Scheduled time is in the past.');
-    res.status(400).send('Scheduled time is in the past.');
-    return;
-  }
+    // Create the email payload for Mailjet
+    const mailjetData = {
+      Messages: [
+        {
+          From: {
+            Email: 'todoListOfficial5657@gmail.com', // Replace with your sender email address
+            Name: 'todoList App',
+          },
+          To: [
+            {
+              Email: userEmail, // Use the user's email address
+            },
+          ],
+          Subject: 'Reminder',
+          HTMLPart: '<p>Your task is due for today</p>',
+        },
+      ],
+      SendAt: emailDateTime.toISOString(), // Convert the date to ISO8601 format
+    };
 
-  // Schedule the email using a setTimeout
-  setTimeout(() => {
-    // Send the email using the sendEmail function
-    sendEmail(userEmail, (error) => {
-      if (error) {
-        // Handle the error as needed
-        console.error('Error scheduling and sending email:', error);
-      } else {
-        console.log('Email scheduled and sent successfully.');
+    // Make a POST request to Mailjet's send endpoint to schedule the email
+    const response = await axios.post(
+      'https://api.mailjet.com/v3.1/send',
+      mailjetData,
+      {
+        auth: {
+          username: apiKey, // Replace with your Mailjet API key
+          password: apiSecretKey, // Replace with your Mailjet API secret
+        },
       }
-    });
-  }, timeDifference);
+    );
 
-  // Respond to the client with a success message
-  res.redirect("/Dashboard?message=EmailScheduled");
+    console.log('Email scheduled successfully:', response.data);
+
+    // Respond to the client with a success message
+    return res.redirect('/Dashboard?message=EmailScheduled');
+  } catch (error) {
+    console.error('Error scheduling and sending email:', error);
+    return res.status(500).send('Error scheduling and sending email.');
+  }
 });
+
 
 app.get("/:customListName",(req,res)=>{
   if(req.isAuthenticated()){
