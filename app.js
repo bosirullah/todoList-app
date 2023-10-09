@@ -8,6 +8,7 @@ const {Item} = require("./models/Item");
 const List = require("./models/List");
 const authRoutes = require("./routes/auth");
 const bodyParser = require("body-parser");
+const CronJob = require('cron').CronJob;
 const axios = require('axios'); // Require Axios for making HTTP requests
 
 
@@ -64,23 +65,11 @@ const item3 = new Item ({
 
 const defaultItems = [item1,item2,item3];
 
-app.post('/schedule-email', async (req, res) => {
+// const axios = require('axios');
+
+// Create a function for sending the email
+const sendEmail = async (userEmail) => {
   try {
-    const userEmail = req.user.username; // Retrieve the user's email from your authentication system
-    const emailDateTimeStr = req.body.emailDateTime;
-    const emailDateTime = new Date(emailDateTimeStr);
-
-    // Ensure the scheduled time is in the future
-    const currentDate = new Date();
-    if (emailDateTime <= currentDate) {
-      console.error('Scheduled time is in the past.');
-      return res.status(400).send('Scheduled time is in the past.');
-    }
-
-    // Calculate the time difference between the scheduled time and the current time in milliseconds
-    const timeDifference = emailDateTime - currentDate;
-
-
     // Create the email payload for Mailjet
     const mailjetData = {
       Messages: [
@@ -98,28 +87,45 @@ app.post('/schedule-email', async (req, res) => {
           HTMLPart: '<p>Your task is due for today</p>',
         },
       ],
-      SendAt: emailDateTime.toISOString(), // Convert the date to ISO8601 format
     };
-    // Use setTimeout to schedule the email to be sent at the specified time
-    setTimeout(async () => {
-      try {
-        // Make a POST request to Mailjet's send endpoint to schedule the email
-        const response = await axios.post(
-          'https://api.mailjet.com/v3.1/send',
-          mailjetData,
-          {
-            auth: {
-              username: apiKey, // Replace with your Mailjet API key
-              password: apiSecretKey, // Replace with your Mailjet API secret
-            },
-          }
-        );
 
-        console.log('Email scheduled successfully:', response.data);
-      } catch (error) {
-        console.error('Error scheduling and sending email:', error);
+    // Make a POST request to Mailjet's send endpoint to schedule the email
+    const response = await axios.post(
+      'https://api.mailjet.com/v3.1/send',
+      mailjetData,
+      {
+        auth: {
+          username: apiKey, // Replace with your Mailjet API key
+          password: apiSecretKey, // Replace with your Mailjet API secret
+        },
       }
-    }, timeDifference);
+    );
+
+    console.log('Email sent successfully:', response.data);
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+};
+
+// Define the Express route for scheduling the email
+app.post('/schedule-email', (req, res) => {
+  try {
+    const userEmail = req.user.username; // Retrieve the user's email from your authentication system
+    const emailDateTimeStr = req.body.emailDateTime;
+    const emailDateTime = new Date(emailDateTimeStr);
+
+    // Ensure the scheduled time is in the future
+    const currentDate = new Date();
+    if (emailDateTime <= currentDate) {
+      console.error('Scheduled time is in the past.');
+      return res.status(400).send('Scheduled time is in the past.');
+    }
+
+    // Create a cron job that triggers the email sending function at the specified time
+    new CronJob(emailDateTime, async () => {
+      await sendEmail(userEmail);
+      console.log('Email scheduled and sent successfully.');
+    }).start();
 
     // Respond to the client with a success message
     return res.redirect('/Dashboard?message=EmailScheduled');
@@ -128,7 +134,6 @@ app.post('/schedule-email', async (req, res) => {
     return res.status(500).send('Error scheduling email.');
   }
 });
-
 
 app.get("/:customListName",(req,res)=>{
   if(req.isAuthenticated()){
