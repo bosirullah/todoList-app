@@ -122,10 +122,10 @@ app.post('/schedule-email', (req, res) => {
     }
 
     // Create a cron job that triggers the email sending function at the specified time
-    new CronJob(emailDateTime, async () => {
-      await sendEmail(userEmail);
-      console.log('Email scheduled and sent successfully.');
-    }).start();
+    sendEmail(userEmail);
+    // new CronJob(emailDateTime, async () => {
+    //   console.log('Email scheduled and sent successfully.');
+    // }).start();
 
     // Respond to the client with a success message
     return res.redirect('/Dashboard?message=EmailScheduled');
@@ -134,6 +134,7 @@ app.post('/schedule-email', (req, res) => {
     return res.status(500).send('Error scheduling email.');
   }
 });
+
 
 app.get("/:customListName",(req,res)=>{
   if(req.isAuthenticated()){
